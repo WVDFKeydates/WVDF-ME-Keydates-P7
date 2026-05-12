@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Month-End Closing Key Dates — WVI FY2026 P7</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --wvi-orange: #E87722; --wvi-orange-light: #FDF0E6;
+    --wvi-blue: #003399; --wvi-blue-light: #E6ECFF;
+    --bg: #F7F5F2; --surface: #FFFFFF; --surface2: #F0EDE8;
+    --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.14);
+    --text-primary: #1A1814; --text-secondary: #6B6760; --text-tertiary: #9E9B96;
+    --green: #1D9E75; --green-light: #E1F5EE;
+    --amber: #B87915; --amber-light: #FDF3DC;
+    --red: #C0392B; --red-light: #FDECEA;
+    --radius: 10px; --radius-lg: 14px;
+  }
+  html { font-size: 15px; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding: 2rem 1.5rem 4rem; }
+  .page { max-width: 1060px; margin: 0 auto; }
+
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 48px; height: 48px; background: var(--wvi-orange); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .org-name { font-size: 11px; font-weight: 500; color: var(--text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+  .badge-fy { background: var(--wvi-blue-light); color: var(--wvi-blue); font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 99px; white-space: nowrap; margin-top: 4px; display: inline-block; letter-spacing: 0.03em; }
+  .print-btn { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 7px 16px; border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .print-btn:hover { background: var(--surface2); }
+
+  .countdown-banner { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--wvi-orange); border-radius: var(--radius); padding: 10px 16px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 12px; font-size: 13px; }
+  .countdown-banner.has-overdue { border-left-color: var(--red); }
+  .countdown-icon { font-size: 18px; flex-shrink: 0; }
+  .countdown-text { color: var(--text-primary); font-weight: 500; }
+  .countdown-sub { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
+
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.25rem; }
+  .metric-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .metric-value { font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 8px; }
+  .metric-sub { font-size: 11px; color: var(--text-tertiary); }
+  .prog-bar { height: 4px; background: var(--border); border-radius: 99px; margin-top: 8px; }
+  .prog-fill { height: 4px; border-radius: 99px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); margin-bottom: 1rem; }
+  .owner-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+  .owner-name { min-width: 100px; color: var(--text-secondary); font-family: 'DM Mono', monospace; font-size: 11px; }
+  .owner-bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 99px; }
+  .owner-bar { height: 6px; border-radius: 99px; }
+  .owner-count { min-width: 22px; text-align: right; font-weight: 600; font-size: 12px; color: var(--text-primary); }
+
+  .filter-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 16px; margin-bottom: 1rem; display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-tertiary); }
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn { font-size: 12px; font-family: 'DM Sans', sans-serif; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+  .filter-btn:hover { background: var(--surface2); }
+  .filter-btn.active { background: var(--wvi-orange); border-color: var(--wvi-orange); color: #fff; }
+
+  .timeline-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .col-header { display: grid; grid-template-columns: 12px 1fr 100px 80px 65px 90px 24px; gap: 10px; padding: 10px 16px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .day-group { border-bottom: 1px solid var(--border); }
+  .day-group:last-child { border-bottom: none; }
+  .day-header { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: var(--surface2); font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+  .day-header:hover { background: #E6E2DC; }
+  .day-header.today-header { background: #FDF0E6; border-left: 3px solid var(--wvi-orange); }
+  .today-badge { font-size: 10px; font-weight: 600; background: var(--wvi-orange); color: #fff; padding: 2px 8px; border-radius: 99px; }
+  .day-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .chevron { margin-left: auto; color: var(--text-tertiary); font-size: 11px; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .day-body.collapsed { display: none; }
+  .task-row { display: grid; grid-template-columns: 12px 1fr 100px 80px 65px 90px 24px; gap: 10px; align-items: start; padding: 8px 16px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  .task-row:last-child { border-bottom: none; }
+  .task-row:hover { background: #FAFAF8; }
+  .task-row.overdue-row { background: #FFF8F7; }
+  .task-row.overdue-row:hover { background: #FDECEA; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-done { background: var(--green); }
+  .dot-prog { background: var(--wvi-orange); }
+  .dot-pend { background: #D3D1C7; }
+  .dot-overdue { background: var(--red); }
+  .task-name { font-size: 12.5px; color: var(--text-primary); line-height: 1.4; }
+  .task-comment { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; font-style: italic; line-height: 1.35; }
+  .task-owner { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-secondary); text-align: right; padding-top: 2px; }
+  .task-due { font-size: 11px; color: var(--text-secondary); text-align: right; padding-top: 2px; }
+  .task-due.overdue-date { color: var(--red); font-weight: 600; }
+  .task-cut { font-size: 11px; color: var(--text-tertiary); text-align: right; padding-top: 2px; }
+  .badge { font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 99px; text-align: center; white-space: nowrap; }
+  .badge-done { background: var(--green-light); color: #0A5C44; }
+  .badge-prog { background: var(--amber-light); color: var(--amber); }
+  .badge-pend { background: var(--surface2); color: var(--text-tertiary); }
+  .badge-overdue { background: var(--red-light); color: var(--red); }
+  .empty-state { padding: 2rem; text-align: center; color: var(--text-tertiary); font-size: 13px; }
+  .footer { margin-top: 2.5rem; text-align: center; font-size: 11px; color: var(--text-tertiary); }
+
+  @media (max-width: 700px) {
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .charts-row { grid-template-columns: 1fr; }
+    .col-header, .task-row { grid-template-columns: 12px 1fr 80px 24px; }
+    .task-owner, .task-due, .task-cut { display: none; }
+    .col-header span:nth-child(3), .col-header span:nth-child(4), .col-header span:nth-child(5), .col-header span:nth-child(6) { display: none; }
+  }
+  @media print {
+    body { background: #fff; padding: 1rem; }
+    .print-btn, .filter-bar { display: none; }
+    .day-body.collapsed { display: block !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="page-header">
+    <div class="header-left">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14" stroke-width="2.5"/><line x1="12" y1="14" x2="12" y2="14" stroke-width="2.5"/><line x1="16" y1="14" x2="16" y2="14" stroke-width="2.5"/><line x1="8" y1="18" x2="8" y2="18" stroke-width="2.5"/><line x1="12" y1="18" x2="12" y2="18" stroke-width="2.5"/></svg>
+      </div>
+      <div>
+        <div class="org-name">World Vision Development Foundation Inc</div>
+        <div class="page-title">Month-End Closing Key Dates</div>
+        <span class="badge-fy">FY2026 · Period 7 · PHLO</span>
+      </div>
+    </div>
+    <button class="print-btn" onclick="expandAll();window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Save PDF
+    </button>
+  </header>
+
+  <div id="countdown-banner"></div>
+  <div class="metrics" id="metrics"></div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Tasks by owner</div>
+      <div id="owner-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Completion by working day</div>
+      <div style="position:relative;height:200px;">
+        <canvas id="dayChart" role="img" aria-label="Stacked bar chart showing task completion by working day"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-group">
+      <div class="filter-group-label">Status</div>
+      <div class="filter-pills" id="status-filters"></div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Owner</div>
+      <div class="filter-pills" id="owner-filters"></div>
+    </div>
+  </div>
+
+  <div class="timeline-card">
+    <div class="col-header">
+      <span></span><span>Activity</span><span style="text-align:right">Owner</span><span style="text-align:right">Due Date</span><span style="text-align:right">Cut-off</span><span style="text-align:right">Status</span><span></span>
+    </div>
+    <div id="timeline"></div>
+  </div>
+
+  <div class="footer">Generated from Keydates.xlsx · World Vision Development Foundation Inc · FY2026 Period 7</div>
+</div>
+
+<script>
+const tasks = [
+  {status:'Completed',name:'Last day to send billing invoice for bank debit',owner:'SFOs_PHLO',wd:-4,due:'Apr 27',dueDate:'2026-04-27',day:'Monday',cut:'3PM',comment:''},
+  {status:'Completed',name:'Pre-run of Aging Report',owner:'SSC-PH',wd:-3,due:'Apr 28',dueDate:'2026-04-28',day:'Tuesday',cut:'5PM',comment:''},
+  {status:'Completed',name:'Transaction Listing for Critical Grants / Priority Collection',owner:'SFOs_PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'SA related Payroll Entries',owner:'PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Direct Charges (excl. EU/BMZ)',owner:'SFOs_PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Payroll (excl. EU/BMZ)',owner:'SFOs_PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Mobile Allowance',owner:'SFOs_PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Insurance (excl. EU/BMZ)',owner:'SFOs_PHLO',wd:-2,due:'Apr 29',dueDate:'2026-04-29',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Recording of Conversion Rate (FT) & GC Funding',owner:'GL_PHLO',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'11AM',comment:''},
+  {status:'Completed',name:'Review accuracy and completeness of Codings & Revaluation',owner:'GL_PHLO',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'12NN',comment:''},
+  {status:'Completed',name:'Exchange Rate Calculation',owner:'SSC-PH',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'1PM',comment:''},
+  {status:'Completed',name:'Inform final rate to NO; NO to confirm',owner:'SSC-PH',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'2PM',comment:''},
+  {status:'Completed',name:'Update Exchange Rate in SunSystems',owner:'SSC-PH',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'3PM',comment:''},
+  {status:'Completed',name:'Ledger Revaluation (LER)',owner:'SSC-PH',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'4PM',comment:''},
+  {status:'Completed',name:'Start Account Allocation',owner:'SSC-PH',wd:-1,due:'Apr 30',dueDate:'2026-04-30',day:'Thursday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Invoice review for Koica Project',owner:'PHLO',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Extract grant profile from Horizon',owner:'RD_Fin',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Confirmation of grant profile from Program Finance',owner:'SFOs_PHLO',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Budget entries (Ledger K/J/B/G) — submit approved entries',owner:'PHLO',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'Budget Upload',comment:''},
+  {status:'Completed',name:'Check split billing; send to NO for confirmation',owner:'SSC-PH',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'10AM',comment:''},
+  {status:'Completed',name:'Send initial accrual entry to PHLO for review',owner:'SSC-PH',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'12NN',comment:''},
+  {status:'Completed',name:'NO to confirm split billing correct codings',owner:'PHLO',wd:1,due:'May 4',dueDate:'2026-05-04',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Payroll (EU/BMZ only)',owner:'PHLO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'10AM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Direct Charges (EU/BMZ only)',owner:'PHLO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'10AM',comment:''},
+  {status:'Completed',name:'Charging Confirmation: Insurance (EU/BMZ only)',owner:'PHLO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'10AM',comment:''},
+  {status:'Completed',name:'Accrual Confirmation from PHLO',owner:'PHLO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'11AM',comment:''},
+  {status:'Completed',name:'Send accrual entry with integration error',owner:'SSC-PH',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'4PM',comment:''},
+  {status:'Completed',name:'Accrual Confirmation and integration error correction',owner:'PHLO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'GEMS Accrual',owner:'Finance_NO',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Check & Clear 59098 Account (before DPC CAL)',owner:'SSC-PH',wd:2,due:'May 5',dueDate:'2026-05-05',day:'Tuesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Posting of Accrual Entry',owner:'SSC-PH',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'11AM',comment:''},
+  {status:'Completed',name:'Update list of Excluded Projects for DPC CAL on MS Teams',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'12NN',comment:''},
+  {status:'Completed',name:'Monthly Budget Accounts Recon (LedB vs Actual vs PBAS)',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Occupancy',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Building Loan',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Settlement Advice',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Life Insurance',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Health Insurance',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'National Travel Insurance',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Payroll Entries',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Direct Charges',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'N2101 Support Cost Reclass to Various Projects Clearing',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'59501 Account For Clearing',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Other After Reval Entries',owner:'PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'CVT Codes review — DPC CAL expenses',owner:'GL_PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Clean-up of TP Eval Flow through / IPF Clean Up',owner:'PF_PHLO',wd:3,due:'May 6',dueDate:'2026-05-06',day:'Wednesday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Before DPC CAL Adjustments (R2R)',owner:'SSC-PH',wd:4,due:'May 7',dueDate:'2026-05-07',day:'Thursday',cut:'12NN',comment:''},
+  {status:'Completed',name:'Send Control Figure to WV Central for DPC CAL Run',owner:'GL_PHLO',wd:4,due:'May 7',dueDate:'2026-05-07',day:'Thursday',cut:'1PM',comment:''},
+  {status:'Completed',name:'DPC CAL Run',owner:'FRSC',wd:4,due:'May 7',dueDate:'2026-05-07',day:'Thursday',cut:'2PM',comment:''},
+  {status:'Completed',name:'CAL Reclass & Support Cost (before CAL)',owner:'PHLO',wd:5,due:'May 8',dueDate:'2026-05-08',day:'Friday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Final Budget Entries (Ledger B/G/K/J)',owner:'PHLO',wd:5,due:'May 8',dueDate:'2026-05-08',day:'Friday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Send Control Figure to WV Central for CAL Run',owner:'GL_PHLO',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'10AM',comment:''},
+  {status:'Completed',name:'Cost Allocation (CAL) Run',owner:'FRSC',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'5PM',comment:''},
+  {status:'Completed',name:'RD Entries (1xxx–3xxx & 5xxx related accounts)',owner:'PHLO',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Last day of Non-CAL related entries (NFA, Balance Sheet)',owner:'PHLO',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Last day of Account Allocation',owner:'SSC-PH',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'6PM',comment:''},
+  {status:'Completed',name:'Reclass of Cash Voucher Transfer Income',owner:'PHLO',wd:6,due:'May 11',dueDate:'2026-05-11',day:'Monday',cut:'6PM',comment:''},
+  {status:'In progress',name:'SCR Entries ONLY (after CAL)',owner:'PHLO',wd:7,due:'May 12',dueDate:'2026-05-12',day:'Tuesday',cut:'6PM',comment:''},
+  {status:'Not yet started',name:'Generate Financial Reports & Send to NO',owner:'SSC-PH',wd:8,due:'May 13',dueDate:'2026-05-13',day:'Wednesday',cut:'1PM',comment:''},
+  {status:'Not yet started',name:'Review Financial Reports by NO',owner:'GL_PHLO',wd:8,due:'May 13',dueDate:'2026-05-13',day:'Wednesday',cut:'4PM',comment:''},
+  {status:'Not yet started',name:'Posting Reports to FFR Database',owner:'SSC-PH',wd:8,due:'May 13',dueDate:'2026-05-13',day:'Wednesday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Power BI Financial Report',owner:'PHLO',wd:9,due:'May 14',dueDate:'2026-05-14',day:'Thursday',cut:'4PM',comment:''},
+  {status:'Not yet started',name:'PNSG Health Tracker',owner:'PHLO',wd:9,due:'May 14',dueDate:'2026-05-14',day:'Thursday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Request CCLR re-run',owner:'PHLO',wd:9,due:'May 14',dueDate:'2026-05-14',day:'Thursday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Operations Financial Highlights & Discussions',owner:'PHLO',wd:9,due:'May 14',dueDate:'2026-05-14',day:'Thursday',cut:'6PM',comment:''},
+  {status:'Not yet started',name:'LDR Compliance report email to OMs & Directors',owner:'PHLO Payroll',wd:9,due:'May 14',dueDate:'2026-05-14',day:'Thursday',cut:'6PM',comment:''},
+  {status:'Not yet started',name:'Finalization of Cover Memo',owner:'PHLO',wd:10,due:'May 15',dueDate:'2026-05-15',day:'Friday',cut:'3PM',comment:'Need to prepare late notif specific for cover memo'},
+  {status:'Not yet started',name:'FFR Discussion with ND',owner:'PHLO',wd:11,due:'May 18',dueDate:'2026-05-18',day:'Monday',cut:'11AM',comment:''},
+  {status:'Not yet started',name:'Sending of Monthly Account Listing Ledger A & E',owner:'GL_PHLO',wd:13,due:'May 22',dueDate:'2026-05-22',day:'Friday',cut:'6PM',comment:''},
+  {status:'Not yet started',name:'Fixed Asset Recon',owner:'GL_PHLO',wd:14,due:'May 22',dueDate:'2026-05-22',day:'Friday',cut:'Quarterly',comment:''},
+  {status:'Not yet started',name:'Send Outstanding 200 Account Listing',owner:'GL_PHLO',wd:14,due:'May 25',dueDate:'2026-05-25',day:'Monday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Send updated 170-172 Account Monitoring Summary',owner:'GL_PHLO',wd:14,due:'May 25',dueDate:'2026-05-25',day:'Monday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Send 230 Accrual Balance to date to NO Finance',owner:'GL_PHLO',wd:14,due:'May 25',dueDate:'2026-05-25',day:'Monday',cut:'5PM',comment:''},
+  {status:'Not yet started',name:'Preparation & Posting Statutory Entries',owner:'GL_PHLO',wd:14,due:'May 25',dueDate:'2026-05-25',day:'Monday',cut:'5PM',comment:''},
+];
+
+const today = new Date(); today.setHours(0,0,0,0);
+const todayStr = today.toISOString().slice(0,10);
+
+function isOverdue(t) {
+  if(t.status==='Completed') return false;
+  if(!t.dueDate) return false;
+  const d=new Date(t.dueDate); d.setHours(0,0,0,0);
+  return d < today;
+}
+
+// Countdown banner
+const overdueTasks = tasks.filter(isOverdue);
+const nextPending = tasks.find(t => t.status!=='Completed' && t.dueDate && new Date(t.dueDate)>=today);
+const banner = document.getElementById('countdown-banner');
+if(overdueTasks.length) {
+  const np = nextPending;
+  const npText = np ? ` · Next: ${np.due} — ${np.name}` : '';
+  banner.innerHTML=`<div class="countdown-banner has-overdue">
+    <span class="countdown-icon">⚠️</span>
+    <div><div class="countdown-text">${overdueTasks.length} overdue task${overdueTasks.length>1?'s':''} need attention</div>
+    <div class="countdown-sub">${overdueTasks.map(t=>t.name).slice(0,2).join(' · ')}${overdueTasks.length>2?' · and '+(overdueTasks.length-2)+' more':''}${npText}</div></div>
+  </div>`;
+} else if(nextPending) {
+  const nd=new Date(nextPending.dueDate); nd.setHours(0,0,0,0);
+  const diff=Math.round((nd-today)/(1000*60*60*24));
+  const label=diff===0?'today':diff===1?'tomorrow':'in '+diff+' days';
+  banner.innerHTML=`<div class="countdown-banner">
+    <span class="countdown-icon">🗓️</span>
+    <div><div class="countdown-text">Next deadline: ${nextPending.due} — ${label}</div>
+    <div class="countdown-sub">${nextPending.name} · ${nextPending.owner}</div></div>
+  </div>`;
+}
+
+// Metrics
+const total=tasks.length,done=tasks.filter(t=>t.status==='Completed').length;
+const inProg=tasks.filter(t=>t.status==='In progress').length,pending=tasks.filter(t=>t.status==='Not yet started').length;
+const pct=Math.round(done/total*100);
+document.getElementById('metrics').innerHTML=`
+  <div class="metric-card"><div class="metric-label">Total tasks</div><div class="metric-value">${total}</div><div class="metric-sub">Period 7 activities</div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:#D3D1C7"></div></div></div>
+  <div class="metric-card"><div class="metric-label">Completed</div><div class="metric-value" style="color:var(--green)">${done}</div><div class="metric-sub">${pct}% of total</div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:var(--green)"></div></div></div>
+  <div class="metric-card"><div class="metric-label">In progress</div><div class="metric-value" style="color:var(--wvi-orange)">${inProg}</div><div class="metric-sub">Currently active</div><div class="prog-bar"><div class="prog-fill" style="width:${Math.round(inProg/total*100)}%;background:var(--wvi-orange)"></div></div></div>
+  <div class="metric-card"><div class="metric-label">Pending</div><div class="metric-value">${pending}</div><div class="metric-sub">Not yet started</div><div class="prog-bar"><div class="prog-fill" style="width:${Math.round(pending/total*100)}%;background:#B4B2A9"></div></div></div>
+`;
+
+// Owner chart
+const ownerCounts={};
+tasks.forEach(t=>{ownerCounts[t.owner]=(ownerCounts[t.owner]||0)+1;});
+const sortedOwners=Object.entries(ownerCounts).sort((a,b)=>b[1]-a[1]);
+const maxOwner=sortedOwners[0][1];
+const barColors=['#E87722','#003399','#1D9E75','#5DCAA5','#D85A30','#378ADD','#BA7517','#639922'];
+const ownerColorMap={};
+sortedOwners.forEach(([o],i)=>{ownerColorMap[o]=barColors[i%barColors.length];});
+document.getElementById('owner-list').innerHTML=sortedOwners.map(([o,c],i)=>`
+  <div class="owner-row">
+    <span class="owner-name">${o}</span>
+    <div class="owner-bar-bg"><div class="owner-bar" style="width:${Math.round(c/maxOwner*100)}%;background:${barColors[i%barColors.length]}"></div></div>
+    <span class="owner-count">${c}</span>
+  </div>`).join('');
+
+// Day chart
+const wdGroups={};
+tasks.forEach(t=>{if(!isNaN(t.wd)){wdGroups[t.wd]=wdGroups[t.wd]||{done:0,total:0};wdGroups[t.wd].total++;if(t.status==='Completed')wdGroups[t.wd].done++;}});
+const wdKeys=Object.keys(wdGroups).map(Number).sort((a,b)=>a-b);
+new Chart(document.getElementById('dayChart'),{
+  type:'bar',
+  data:{labels:wdKeys.map(d=>`WD ${d}`),datasets:[
+    {label:'Completed',data:wdKeys.map(d=>wdGroups[d].done),backgroundColor:'#1D9E75'},
+    {label:'Remaining',data:wdKeys.map(d=>wdGroups[d].total-wdGroups[d].done),backgroundColor:'#E8E5DF'}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+    scales:{x:{stacked:true,ticks:{font:{size:9.5},color:'#9E9B96'},grid:{display:false}},
+            y:{stacked:true,ticks:{font:{size:10},color:'#9E9B96'},grid:{color:'rgba(0,0,0,0.05)'}}}}
+});
+
+// Filters
+let activeStatus='All', activeOwner='All';
+const statuses=['All','Completed','In progress','Not yet started'];
+const owners=['All',...sortedOwners.map(([o])=>o)];
+const statusEl=document.getElementById('status-filters');
+const ownerEl=document.getElementById('owner-filters');
+statusEl.innerHTML=statuses.map(s=>`<button class="filter-btn${s==='All'?' active':''}" data-s="${s}">${s}</button>`).join('');
+ownerEl.innerHTML=owners.map(o=>`<button class="filter-btn${o==='All'?' active':''}" data-o="${o}">${
+  o!=='All'?`<span style="width:7px;height:7px;border-radius:50%;background:${ownerColorMap[o]};display:inline-block;flex-shrink:0"></span>`:''}${o}</button>`).join('');
+
+statusEl.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.onclick=()=>{activeStatus=btn.dataset.s;statusEl.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===activeStatus));renderTimeline();};
+});
+ownerEl.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    activeOwner=btn.dataset.o;
+    ownerEl.querySelectorAll('.filter-btn').forEach(b=>{
+      const on=b.dataset.o===activeOwner;
+      b.classList.toggle('active',on);
+      if(on&&b.dataset.o!=='All') b.style.cssText=`background:${ownerColorMap[b.dataset.o]};border-color:${ownerColorMap[b.dataset.o]};color:#fff`;
+      else if(b.dataset.o!=='All') b.style.cssText='';
+    });
+    renderTimeline();
+  };
+});
+
+const collapseState={};
+function expandAll(){Object.keys(collapseState).forEach(k=>{collapseState[k]=false;});}
+
+function renderTimeline(){
+  let filtered=tasks;
+  if(activeStatus!=='All') filtered=filtered.filter(t=>t.status===activeStatus);
+  if(activeOwner!=='All') filtered=filtered.filter(t=>t.owner===activeOwner);
+  const groups={}, groupMeta={};
+  filtered.forEach(t=>{
+    const key=t.wd<=0?`Pre-close (WD ${t.wd} · ${t.day})`:`Working Day ${t.wd} · ${t.day}`;
+    if(!groups[key]){groups[key]=[];groupMeta[key]=t.dueDate||'';}
+    groups[key].push(t);
+  });
+  const tl=document.getElementById('timeline');
+  tl.innerHTML='';
+  if(!filtered.length){tl.innerHTML='<div class="empty-state">No tasks match this filter.</div>';return;}
+  Object.entries(groups).forEach(([g,ts])=>{
+    const allDone=ts.every(t=>t.status==='Completed');
+    const anyProg=ts.some(t=>t.status==='In progress');
+    const anyOverdue=ts.some(t=>isOverdue(t));
+    const dotCls=anyOverdue?'dot-overdue':allDone?'dot-done':anyProg?'dot-prog':'dot-pend';
+    const isToday=groupMeta[g]===todayStr;
+    if(collapseState[g]===undefined) collapseState[g]=allDone&&!isToday;
+    const collapsed=collapseState[g];
+    const div=document.createElement('div');
+    div.className='day-group';
+    const hCls='day-header'+(isToday?' today-header':'');
+    const todayBadge=isToday?'<span class="today-badge">Today</span>':'';
+    div.innerHTML=`<div class="${hCls}" data-key="${g}">
+        <span class="day-dot ${dotCls}"></span>${g}${todayBadge}
+        <span class="chevron${collapsed?'':' open'}">▾</span>
+      </div>
+      <div class="day-body${collapsed?' collapsed':''}">` +
+      ts.map(t=>{
+        const od=isOverdue(t);
+        const bCls=od?'badge-overdue':t.status==='Completed'?'badge-done':t.status==='In progress'?'badge-prog':'badge-pend';
+        const label=od?'Overdue':t.status==='Not yet started'?'Pending':t.status;
+        const dCls=od?'dot-overdue':t.status==='Completed'?'dot-done':t.status==='In progress'?'dot-prog':'dot-pend';
+        const dueCls='task-due'+(od?' overdue-date':'');
+        const rowCls='task-row'+(od?' overdue-row':'');
+        const commentHtml=t.comment?`<div class="task-comment">💬 ${t.comment}</div>`:'';
+        return `<div class="${rowCls}">
+          <span class="status-dot ${dCls}"></span>
+          <span class="task-name">${t.name}${commentHtml}</span>
+          <span class="task-owner">${t.owner}</span>
+          <span class="${dueCls}">${t.due||'—'}</span>
+          <span class="task-cut">${t.cut}</span>
+          <span class="badge ${bCls}">${label}</span>
+          <span></span>
+        </div>`;
+      }).join('')+'</div>';
+    tl.appendChild(div);
+    div.querySelector('.day-header').addEventListener('click',()=>{
+      collapseState[g]=!collapseState[g];
+      div.querySelector('.day-body').classList.toggle('collapsed',collapseState[g]);
+      div.querySelector('.chevron').classList.toggle('open',!collapseState[g]);
+    });
+  });
+}
+renderTimeline();
+</script>
+</body>
+</html>
